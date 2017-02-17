@@ -9,11 +9,11 @@ class ProtestTable extends Component {
             <thead>
                 <tr>
                     <td>Date</td>
-                    <td>City</td>
-                    <td>State</td>
+                    <td className="mdl-data-table__cell--non-numeric">City</td>
+                    <td className="mdl-data-table__cell--non-numeric">State</td>
                     <td>Time</td>
-                    <td>Location</td>
-                    <td>Link</td>
+                    <td className="mdl-data-table__cell--non-numeric">Location</td>
+                    <td className="mdl-data-table__cell--non-numeric">Link</td>
                 </tr>
             </thead>
             <tbody>
