@@ -7,7 +7,13 @@ import ProtestTable from './ProtestTable'
 class ProtestTableContainer extends Component {
     constructor() {
         super();
-        this.state = { protests: [] }
+        this.state = { 
+        	protests: [],
+        	protestsSort: {
+        		'key': '',
+        		'dir': ''
+        	}
+        }
     }
 
     getData() {
@@ -40,10 +46,12 @@ class ProtestTableContainer extends Component {
 
             let date = protest[0] || '';
             let dateMoment = null;
+            let dateUnix = 0;
             let dateString = '';
             if (date) {
                 dateMoment = moment(date, 'ddd, MMM D');
-                dateString = dateMoment.format('ddd MMM D YYYY')
+                dateUnix = dateMoment.unix();
+                dateString = dateMoment.format('ddd MMM D YYYY');
             }
 
             let city = protest[1] || '';
@@ -52,19 +60,43 @@ class ProtestTableContainer extends Component {
             let location = protest[4] || '';
             let url = protest[5] || '';
 
-            return { row, dateString, city, state, time, location, url }
+            return { row, dateUnix, dateString, city, state, time, location, url }
         });
-        protests = orderBy(protests, ['date']);
-        this.setState({protests});
+        this.updateProtestsState(protests, 'dateUnix', 'asc');
     }
 
-    getTimezone(city, state) {
+    updateProtestsState(protests, key, dir) {
+      this.setState({
+        protests: orderBy(protests, [key], [dir]),
+        protestsSort: {
+          key: key,
+          dir: dir
+        }
+      });
+    }
 
+    sortByColumn = (e) => {
+      var data = null;
+      var dir = 'asc';
+
+      if (e.target.nodeName === 'SPAN' || e.target.nodeName === 'I') {
+        data = e.target.parentElement.dataset;
+      } else if (e.target.nodeName === 'A') {
+        data = e.target.dataset;
+      } else if (e.target.nodeName === 'TD') {
+        data = e.target.children[0].dataset;
+      }
+
+    	if (data && 'key' in data) {
+        if (data.key === this.state.protestsSort.key && this.state.protestsSort.dir === 'asc') {
+          dir = 'desc';
+        }
+        this.updateProtestsState(this.state.protests, data.key, dir);
+      }
     }
 
     render() {
-        return <ProtestTable protests={ this.state.protests }
-        />;
+        return <ProtestTable protests={this.state.protests} protestsSort={this.state.protestsSort} sortByColumn={this.sortByColumn}/>;
     }
 }
 
