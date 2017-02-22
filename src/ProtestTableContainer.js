@@ -4,13 +4,19 @@ import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import ProtestTable from './ProtestTable';
 
+const SPREADSHEET_ID = '1BHLcMeNwk779OHpYjvMRqDQKXiJAqsmhkvrYQzU8CtE';
+
 const periods = {
-  CURRENT: 'current',
-  PAST: 'past'
+  current: {
+    name: 'Current or Upcoming Actions',
+    sheetId: 0,
+  },
+  past: {
+    name: 'Past Actions',
+    sheetId: 941154079
+  }
 };
-const sheetIds = {};
-sheetIds[periods.CURRENT] = 0;
-sheetIds[periods.PAST] = 941154079;
+
 
 class ProtestTableContainer extends Component {
 
@@ -18,13 +24,13 @@ class ProtestTableContainer extends Component {
     super();
 
     this.state = {
-      activeSheetId: 0,
+      activeSheetTitle: 0,
       protests: [],
       protestsSort: {
         'key': '',
         'dir': ''
       },
-      protestsPeriod: periods.CURRENT
+      protestsPeriod: periods.current
     };
   }
 
@@ -38,12 +44,10 @@ class ProtestTableContainer extends Component {
       ],
     }).then(function() {
       return window.gapi.client.request({
-        'path': 'https://sheets.googleapis.com/v4/spreadsheets/1BHLcMeNwk779OHpYjvMRqDQKXiJAqsmhkvrYQzU8CtE'
-      // 'path': 'https://sheets.googleapis.com/v4/spreadsheets/1BHLcMeNwk779OHpYjvMRqDQKXiJAqsmhkvrYQzU8CtE/values/A3:F'
+        'path': `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${self.state.protestsPeriod.name}!A3:F`
       });
     }).then(function(response) {
-      self.setActiveSheet(response.result.sheets);
-    // self.setProtests(response);
+      self.setProtests(response.result.values);
     }, function(reason) {
       console.log('Error: ' + reason.details);
     });
@@ -51,28 +55,11 @@ class ProtestTableContainer extends Component {
 
   componentDidMount() {
     window.gapi.load('client', () => {
-      this.getData(true, this.getProtests);
+      this.getData();
     });
   }
 
-  getSheetFromPeriod(sheets, period) {
-    return find(sheets, function(sheet) {
-        return sheet.properties.sheetId === sheetIds[period]
-      }
-    );
-  }
-
-  setActiveSheet(sheets) {
-    var activeSheet = this.getSheetFromPeriod(sheets, this.state.protestsPeriod);
-
-    this.setState({
-      activeSheetId: activeSheet.properties.sheetId
-    });
-  }
-
-  setProtests(response) {
-    let protests = response.result.values || [];
-
+  setProtests(protests) {
     protests = protests.map((protest, i) => {
       let row = i + 2;
 
@@ -104,11 +91,11 @@ class ProtestTableContainer extends Component {
         url
       };
     });
-    this.updateProtestsState(protests, this.protestTimes.CURRENT,
+    this.updateProtestsState(protests, periods.current,
       'dateUnix', 'asc');
   }
 
-  updateProtestsState(protests, currentOrPast, key, dir) {
+  updateProtestsState(protests, key, dir, currentOrPast) {
     this.setState({
       protests: orderBy(protests, [key], [dir]),
       protestsPeriod: currentOrPast,
@@ -121,7 +108,7 @@ class ProtestTableContainer extends Component {
 
   sortByColumn = (e) => {
     var data = null;
-    var dir = 'asc';
+    var dir = null;
 
     if (e.target.nodeName === 'SPAN' || e.target.nodeName === 'I') {
       data = e.target.parentElement.dataset;
@@ -135,6 +122,8 @@ class ProtestTableContainer extends Component {
       if (data.key === this.state.protestsSort.key && this.state.protestsSort
           .dir === 'asc') {
         dir = 'desc';
+      } else {
+        dir = 'asc';
       }
       this.updateProtestsState(this.state.protests, data.key, dir);
     }
