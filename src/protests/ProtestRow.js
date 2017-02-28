@@ -3,6 +3,9 @@ import './ProtestRow.css';
 
 class Protest extends Component {
   render() {
+    if (!this.props.protest) {
+        return null;
+    }
     return (
         <tr>
             <td>{this.props.protest['dateString']}</td>
