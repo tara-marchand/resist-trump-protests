@@ -1,5 +1,4 @@
-import { find, orderBy } from 'lodash';
-import classnames from 'classnames';
+import { find } from 'lodash';
 // import maps from '@google/maps';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
@@ -15,12 +14,8 @@ class ProtestTableContainer extends Component {
 
         this.state = {
             protests: [],
-            sortKey: 'dateUnix',
-            sortDir: 'asc',
             visible: false
-        };
-
-        this.getSortIcon = this.getSortIcon.bind(this);
+        }
     }
 
     getData() {
@@ -99,51 +94,6 @@ class ProtestTableContainer extends Component {
         });
     }
 
-    sortByColumn = (e) => {
-        var data = null;
-        var dir = null;
-
-        if (e.target.nodeName === 'SPAN' || e.target.nodeName === 'I') {
-            data = e.target.parentElement.dataset;
-        } else if (e.target.nodeName === 'A') {
-            data = e.target.dataset;
-        } else if (e.target.nodeName === 'TD') {
-            data = e.target.children[0].dataset;
-        }
-
-        if (data && 'key' in data) {
-            if (data.key === this.state.sortKey && this.state.sortDir === 'asc') {
-                dir = 'desc';
-            } else {
-                dir = 'asc';
-            }
-            this.setState({
-                protests: orderBy(this.state.protests, [data.key], [dir]),
-                sortKey: data.key,
-                sortDir: dir
-            });
-        }
-    }
-
-    getSortIcon(thisKey) {
-        var prefix = '';
-        var suffix = '';
-        var classes = null;
-
-        if (thisKey === this.state.sortKey) {
-            prefix = 'fi-arrow-';
-            if (this.state.sortDir === 'asc') {
-                suffix = 'up';
-            } else {
-                suffix = 'down';
-            }
-        }
-
-        classes = classnames((prefix + suffix));
-
-        return (<i className={classes}> </i>);
-    }
-
     toggleProtestsVisible = (e) => {
         this.setState(prevState => ({
             visible: !prevState.visible
@@ -152,13 +102,9 @@ class ProtestTableContainer extends Component {
 
     render() {
         return (<ProtestTable protests={this.state.protests}
-            sort={this.state.sort}
             visible={this.state.visible}
-            sortByColumn={this.sortByColumn}
             toggleProtestsVisible={this.toggleProtestsVisible}
-            lastUpdate={this.state.lastUpdate}
-            getSortIcon={this.getSortIcon}
-            />
+            lastUpdate={this.state.lastUpdate} />
         );
     }
 }

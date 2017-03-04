@@ -1,8 +1,46 @@
 import React, { Component } from 'react';
-import ProtestRow from './ProtestRow';
+import Table from '../Table';
 import './ProtestTable.css';
+import ProtestRow from './ProtestRow';
 
 class ProtestTable extends Component {
+  constructor(props) {
+    super(props);
+
+    this.headers = [
+      {
+        isSortable: true,
+        dataKey: 'dateUnix',
+        name: 'Date',
+      },
+      {
+        isSortable: true,
+        dataKey: 'city',
+        name: 'City',
+      },
+      {
+        isSortable: true,
+        dataKey: 'state',
+        name: 'State',
+      },
+      {
+        isSortable: false,
+        dataKey: '',
+        name: '',
+      },
+      {
+        isSortable: false,
+        dataKey: '',
+        name: '',
+      },
+      {
+        isSortable: false,
+        dataKey: '',
+        name: '',
+      }
+    ];
+  }
+
   render() {
     if (this.props.visible) {
       return (
@@ -12,7 +50,7 @@ class ProtestTable extends Component {
             <p>Data from <a href="https://docs.google.com/spreadsheets/d/1BHLcMeNwk779OHpYjvMRqDQKXiJAqsmhkvrYQzU8CtE/edit#gid=0" target="_blank">this Google Sheet</a> compiled by <a href="https://twitter.com/igorvolsky" target="_blank">@igorvolsky</a>.</p>
             <p>{this.props.lastUpdate}</p>
           </div>
-          <this.table />
+          <Table headers={this.headers} rows={this.props.protests} sortByColumn={this.props.sortByColumn} getSortIcon={this.props.getSortIcon} getRowEl={this.getRowEl} />
         </div>
       )
     } else {
@@ -24,6 +62,10 @@ class ProtestTable extends Component {
     }
   }
 
+  getRowEl(protest) {
+    return <ProtestRow key={protest.row} protest={protest}/>
+  }
+
   button = () => {
     const classNames = ['button']    
     return (
@@ -31,46 +73,6 @@ class ProtestTable extends Component {
         {this.props.visible ? 'Hide' : 'Show'} Protests
       </a>
     )
-  }
-
-  table = () => {
-    return (
-      <table>
-        <thead>
-          <tr>
-              <td onClick={this.props.sortByColumn}>
-                <a href="#" data-key="dateUnix">
-                  <span>Date</span>
-                  {this.props.getSortIcon('dateUnix')}
-                </a>
-              </td>
-              <td onClick={this.props.sortByColumn}>
-                <a href="#" data-key="city">
-                  <span>City</span>
-                  {this.props.getSortIcon('city')}
-                  </a>
-              </td>
-              <td onClick={this.props.sortByColumn}>
-                <a href="#" data-key="state">
-                  <span>State</span>
-                  {this.props.getSortIcon('state')}
-                </a>
-              </td>
-              <td>Time</td>
-              <td>Location</td>
-              <td>Link</td>
-          </tr>
-        </thead>
-        <tbody>
-          {this.props.protests.map(function(protest) {
-            if (protest) {
-              return <ProtestRow key={protest.row} protest={protest}/>
-            }
-            return null;
-          })}
-        </tbody>
-      </table>
-      )
   }
 }
 
